@@ -1,0 +1,12 @@
+name: homicidios
+title: homicidios
+username:
+account: davidtorres
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1071586
+bundleId: 2319988
+url: https://davidtorres.shinyapps.io/homicidios/
+when: 1565813409.51511
+asMultiple: FALSE
+asStatic: FALSE

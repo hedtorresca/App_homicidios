@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1567029047130.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "3D4FFE7B",
+    "lastKnownWriteTime" : 80,
+    "last_content_update" : 1567029047130,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "FE9E9F9F",
+        "caption" : "conteo2",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=conteo2&cache_key=FE9E9F9F",
+        "displayedObservations" : 487,
+        "environment" : "",
+        "expression" : "conteo2",
+        "object" : "conteo2",
+        "preview" : 0,
+        "totalObservations" : 487,
+        "variables" : 4
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

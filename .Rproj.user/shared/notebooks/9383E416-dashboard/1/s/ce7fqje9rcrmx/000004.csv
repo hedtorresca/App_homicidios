@@ -1,0 +1,5 @@
+"0","lag(Tasa_Municipio, na.pad = TRUE)
+"
+"2","Error in lag(Tasa_Municipio, na.pad = TRUE) : 
+  object 'Tasa_Municipio' not found
+"

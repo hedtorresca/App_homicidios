@@ -1,0 +1,26 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1570116038575.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1953102905",
+    "id" : "F7ABF08A",
+    "lastKnownWriteTime" : 1570122782,
+    "last_content_update" : 1570122782656,
+    "path" : "/cloud/project/GBD.R",
+    "project_path" : "GBD.R",
+    "properties" : {
+        "cursorPosition" : "16,0",
+        "scrollLine" : "8",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

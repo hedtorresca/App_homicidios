@@ -1,0 +1,12 @@
+name: homicidios
+title: homicidios
+username:
+account: geogeeks
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1088119
+bundleId: 2441055
+url: https://geogeeks.shinyapps.io/homicidios/
+when: 1569340089.81734
+asMultiple: FALSE
+asStatic: FALSE

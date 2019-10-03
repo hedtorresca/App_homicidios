@@ -1,0 +1,692 @@
+---
+title: "Análisis de violencia crónica por media y niveles de variabilidad nacional"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    social: menu
+
+---
+
+```{r global, include=FALSE}
+library(plotly)
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+library(shiny)
+library(DT)
+source("functions.R", encoding = "UTF-8")
+
+# tipovar3 <- c("text", "text", "text", "text", "numeric" ,  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric"
+#               ,  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric",  "numeric", "text", "text"
+#               , "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text", "text")
+
+definitiva <- read_excel("Tabla_definitivaV2.0.xlsx")
+
+# vector.is.empty <- function(x) return(length(x) ==0 )
+
+
+media.nacional <- NULL
+for(i in 2002:2018){
+  mediaaño <- mean(sapply(select (definitiva, contains (paste0(i,".tasa"))), as.numeric, 2), na.rm = T)
+  media.nacional <- rbind(media.nacional, mediaaño) 
+  
+}
+
+desv.nacional <- NULL
+for(i in 2002:2018){
+  sdaño <- sd(sapply(select (definitiva, contains (paste0(i,".tasa"))), as.numeric, 2), na.rm = T)
+  desv.nacional <- rbind(desv.nacional, sdaño) 
+  
+}
+
+años <- 2002:2018
+
+datosnal <- data_frame(años, media.nacional, desv.nacional)
+colnames(datosnal) <- c("year", "media.nacional", "sd.nacional")
+
+
+
+
+```
+
+<!-- Rezago de 1 año -->
+<!-- =====================================   -->
+
+<!-- Column {.sidebar} -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ```{r} -->
+<!-- selectInput('municipio', 'Seleccione el municipio de su interés', definitiva$`MUNICIPIO - DEPARTAMENTO`) -->
+
+<!-- sliderInput("porcentaje", "Tasa de variación respecto al año anterior", -->
+<!--                   min = 0, max = 100, -->
+<!--                   value = 5, step = 1) -->
+
+<!-- ``` -->
+
+<!-- Column -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ### Monitoreo del municipio -->
+
+<!-- ```{r} -->
+
+<!-- plotdata2 <- reactive({ -->
+<!-- plot <- data.frame(x=datosnal$year, y=datosnal$media.nacional,  -->
+<!--                        mun= as.numeric(t(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== input$municipio, 9:25])), -->
+<!--                        upper3 = datosnal$media.nacional+4*datosnal$sd.nacional,  -->
+<!--                        upper2 = datosnal$media.nacional+2*datosnal$sd.nacional,  -->
+<!--                        upper = datosnal$media.nacional+datosnal$sd.nacional, -->
+<!--                        lower= datosnal$media.nacional-datosnal$sd.nacional) -->
+<!-- colnames(plot) <- c("Año", "Tasa", "Tasa_Municipio",  "más_3_desv.","más_2_desv.",   "más_1_desv.","menos_1_desv.") -->
+
+
+<!-- return(plot) -->
+
+<!-- }) -->
+
+<!-- plotdata <- reactive({ -->
+
+<!-- plot1 <- plotdata2() %>% -->
+<!--   mutate(tsa.cmbio= (Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE))/(lag(Tasa_Municipio, na.pad = TRUE)), dfrncia= -->
+<!--            Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE) ) -->
+<!--   return(plot1) -->
+<!-- }) -->
+
+<!-- output$scatter <- renderPlotly({ -->
+
+<!-- p <- ggplot(plotdata()) + geom_line(aes(y=Tasa, x=Año, colour = "blue"))  +  -->
+<!--   geom_line(aes(y=Tasa_Municipio, x=Año, colour = "red")) + -->
+<!--   geom_ribbon(aes(ymin=más_2_desv., ymax=más_3_desv., x=Año, fill = "red"), alpha = 0.3)+ -->
+<!--   geom_ribbon(aes(ymin=más_1_desv., ymax=más_2_desv., x=Año, fill = "orange"), alpha = 0.3)+ -->
+<!--   geom_ribbon(aes(ymin=Tasa, ymax=más_1_desv., x=Año, fill = "yellow") ,alpha = 0.3)+ -->
+<!--   scale_fill_identity() + theme(legend.position="none")+ -->
+<!--   geom_ribbon(aes(ymin=menos_1_desv., ymax=Tasa, x=Año, fill = "lightgreen") ,alpha = 0.3)+ -->
+<!--   scale_fill_identity() + theme(legend.position="none")+ -->
+<!--   # geom_point(data=subset(plotdata(), tsa.cmbio>(input$porcentaje/100)), aes(y=Tasa_Municipio,x=Año))+ -->
+<!--   geom_text(data=subset(plotdata(), tsa.cmbio>(input$porcentaje/100)), aes(y=Tasa_Municipio,x=Año,  -->
+<!--                                                        label=paste0(round(tsa.cmbio,2)*100, "%"), -->
+<!--                                                        vjust=-1))+ -->
+<!--   ggtitle(paste0(input$municipio, " : ", "Picos con más de ", input$porcentaje, "% de variación")) -->
+
+
+<!-- p <- ggplotly(p) -->
+<!-- p -->
+<!-- }) -->
+
+<!-- plotlyOutput('scatter', width = "80%") -->
+
+<!-- ``` -->
+
+
+Picos de violencia aguda
+===========================================
+
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+selectInput('municipio2', 'Seleccione el municipio de su interés', definitiva$`MUNICIPIO - DEPARTAMENTO`)
+
+sliderInput("porcentaje2", "Número de desviaciones estándar con respecto a la media movil municipal. Se muestran los picos que superan ese rasero.",
+                  min = 0, max = 3,
+                  value = 0.2, step = 0.1)
+sliderInput("porcentaje3", "Seleccione cuántos años se consideran para calcular los promedios móviles (Por ejemplo, si n=5 para un un año depende solo de los 4 años anteriores). La media móvil normaliza las fluctuaciones de plazos cortos y resalta tendencias",
+                  min = 2, max = 17,
+                  value = 5, step = 1)
+
+sliderInput("porcentaje4", "Tasa de variación respecto al año anterior.Se muestran los picos que superan ese rasero y que cumplen en simultáneo las condiciones anteriores",
+                   min = 0, max = 100,
+                   value = 10, step = 1)
+
+```
+
+#### Tenga en cuenta que:
+
+La línea negra represanta la tasa promedio del municipio. La roja es la tasa promedio nacional. La línea verde representa la serie de promedios móviles. La línea azul es la serie del municipio.
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Monitoreo del municipio
+
+```{r}
+
+
+ mediaquinquenio1 <- reactive({
+   if(input$porcentaje3 <=16){
+     temp1 <- apply(sapply(select (definitiva, contains(paste0(".tasa"))), as.numeric, 1)[,1:(input$porcentaje3)], 1, mean, na.rm=T)
+     return(temp1)
+   }else{
+temp1 <- apply(sapply(select (definitiva, contains(paste0(".tasa"))), as.numeric, 1)[,1:(input$porcentaje3)], 1, mean, na.rm=T)
+return(temp1)
+   }
+ })
+
+media.municipal <- reactive({
+     if(input$porcentaje3 <=16){
+   media.municipal1 <- NULL
+for(i in (input$porcentaje3+1):17){
+  mediaquinquenio <- apply(sapply(select (definitiva, contains(paste0(".tasa"))), as.numeric, 1)[,(i-(input$porcentaje3-1)):i], 1, mean, na.rm=T)
+  media.municipal1 <- cbind(media.municipal1, mediaquinquenio)
+}
+return(media.municipal1)
+     }else{
+         media.municipal1 <- NULL
+  return(media.municipal1)
+}
+})
+
+constante <- reactive({
+     if(input$porcentaje3 <=17){
+temp2 <- matrix(rep(mediaquinquenio1()), ncol=input$porcentaje3, nrow=1122)
+return(temp2)
+     }else{
+       temp2 <-NULL
+     }
+})
+
+media.movil <- reactive({
+     if(input$porcentaje3 <=17){
+  temp <- cbind(constante(),media.municipal())
+colnames(temp) <- años
+rownames(temp) <- definitiva$`MUNICIPIO - DEPARTAMENTO`
+return(temp)
+     }
+  })
+
+
+ sdquinquenio1 <- reactive({
+        if(input$porcentaje3 <=17){
+temp3 <- apply(sapply(select (definitiva, contains(paste0(".tasa"))), as.numeric, 1)[,1:input$porcentaje3], 1, sd, na.rm=T)
+return(temp3)
+        }else{
+          temp3 <- NULL
+          return(temp3)
+        }
+ })
+
+
+ sd.municipal <- reactive({
+        if(input$porcentaje3 <=16){
+    sd.municipal1 <- NULL
+for(i in (input$porcentaje3+1):17){
+  sdquinquenio <- apply(sapply(select (definitiva, contains(paste0(".tasa"))), as.numeric, 1)[,(i-(input$porcentaje3-1)):i], 1, sd, na.rm=T)
+  sd.municipal1 <- cbind(sd.municipal1, sdquinquenio)
+}
+return(sd.municipal1)
+        }else{
+          sd.municipal1 <- NULL
+          return(sd.municipal1)
+        }
+})
+
+constante2 <- reactive({
+       if(input$porcentaje3 <=17){
+temp4 <- matrix(rep(sdquinquenio1()), ncol=input$porcentaje3, nrow=1122)
+return(temp4)
+       }else{
+         temp4 <- NULL
+         return(temp4)
+       }
+})
+
+sd.movil <- reactive({
+       if(input$porcentaje3 <=17){
+  sdmovil2 <- cbind(constante2(),sd.municipal())
+  rownames(sdmovil2) <- definitiva$`MUNICIPIO - DEPARTAMENTO`
+colnames(sdmovil2)  <- años
+return(sdmovil2)
+       }
+
+  })
+
+
+
+plotdata3 <- reactive({
+plot3 <- data.frame(rep(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== input$municipio2,]$`CÓDIGO MUNICIPIO`, 17), rep(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== input$municipio2,]$MUNICIPIO,17), rep(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== input$municipio2,]$DEPARTAMENTO,17), x=datosnal$year, y=datosnal$media.nacional,
+                       mun= as.numeric(t(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== input$municipio2, 9:25])),
+                       upper3 = datosnal$media.nacional+3*datosnal$sd.nacional,
+                       upper2 = datosnal$media.nacional+2*datosnal$sd.nacional,
+                       upper = datosnal$media.nacional+datosnal$sd.nacional,
+                       lower= datosnal$media.nacional-datosnal$sd.nacional,
+                       movil= media.movil()[rownames(media.movil()) == input$municipio2,],
+                       sdmovil =sd.movil()[rownames(sd.movil()) == input$municipio2,]
+                    )
+
+colnames(plot3) <- c("Código", "Municipio", "Departamento","Año", "Tasa", "Tasa_Municipio",  "más_3_desv.","más_2_desv.",   "más_1_desv.","menos_1_desv.", "Movil", "SDMovil")
+
+return(plot3)
+
+})
+
+plotdata4 <- reactive({
+
+plot4 <- plotdata3() %>%
+  mutate(tsa.cmbio= (Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE))/(lag(Tasa_Municipio, na.pad = TRUE)), dfrncia=
+           Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE) )
+  return(plot4)
+})
+
+output$scatter2 <- renderPlotly({
+
+  validate(
+      need(nrow(subset(plotdata4(), Tasa_Municipio>Movil+SDMovil*input$porcentaje2 & tsa.cmbio>(input$porcentaje4/100)))!=0, "No existen picos de violencia aguda en este municipio según los parámetros determinados")
+    )
+
+p <- ggplot(plotdata4()) + geom_line(aes(y=Tasa, x=Año, colour = "blue"))  +
+  geom_line(aes(y=Tasa_Municipio, x=Año, colour = "red")) +
+    geom_line(aes(y=Movil, x=Año, colour = "green")) +
+
+  geom_ribbon(aes(ymin=más_2_desv., ymax=más_3_desv., x=Año, fill = "red"), alpha = 0.3)+
+  geom_ribbon(aes(ymin=más_1_desv., ymax=más_2_desv., x=Año, fill = "orange"), alpha = 0.3)+
+  geom_ribbon(aes(ymin=Tasa, ymax=más_1_desv., x=Año, fill = "yellow") ,alpha = 0.3)+
+   geom_ribbon(aes(ymin=Movil, ymax=Movil + SDMovil*input$porcentaje2, x=Año, fill = "darkgreen") ,alpha = 0.3)+
+  geom_ribbon(aes(ymin=menos_1_desv., ymax=Tasa, x=Año, fill = "lightgreen") ,alpha = 0.3)+scale_fill_identity() + theme(legend.position="none")+
+    # geom_point(data=subset(plotdata4(), Tasa_Municipio>Movil+SDMovil*input$porcentaje2 & tsa.cmbio>(input$porcentaje4/100)), aes(y=Tasa_Municipio,x=Año))+
+  geom_text(data=subset(plotdata4(), Tasa_Municipio>Movil+SDMovil*input$porcentaje2 & tsa.cmbio>(input$porcentaje4/100)), aes(y=Tasa_Municipio,x=Año, label=paste0(round(tsa.cmbio,2)*100, "%")))+
+   ggtitle(paste0(input$municipio2, " : ", "Picos con más de ", input$porcentaje2, " desv. est. arriba de media móvil municipal")) +
+    geom_hline(yintercept = mean(plotdata4()$Tasa_Municipio, na.rm=TRUE))
+
+
+
+p <- ggplotly(p)
+p
+
+
+})
+
+plotlyOutput('scatter2', width = "80%")
+
+plotall <- reactive({
+plotall2 <-NULL
+for(i in definitiva$`MUNICIPIO - DEPARTAMENTO`){
+plot3 <- data.frame(rep(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== i,]$`CÓDIGO MUNICIPIO`, 17), rep(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== i,]$MUNICIPIO,17), rep(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== i,]$DEPARTAMENTO,17) ,datosnal$year, 
+                       as.numeric(t(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== i, 9:25]))
+                       ,media.movil()[rownames(media.movil()) == i,],
+                       sd.movil()[rownames(sd.movil()) == i,]
+                    # ,0,0
+                    
+                     )
+
+plotall2<- rbind(plotall2, plot3)
+}
+
+colnames(plotall2) <- c("Código", "Municipio", "Departamento", "Año", "Tasa_Municipio",  "Movil", "SDMovil")
+
+
+plotall2 <- plotall2 %>%
+  mutate(tsa.cmbio= (Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE))/(lag(Tasa_Municipio, na.pad = TRUE)), dfrncia=
+           Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE) )
+
+
+
+
+
+return(plotall2)
+})
+
+tabla1 <- reactive({
+subset(plotdata4(), Tasa_Municipio>Movil+SDMovil*input$porcentaje2 & tsa.cmbio>(input$porcentaje4/100))  %>% mutate(Tasa_Variacion = round((tsa.cmbio)*100,2),Tasa_Municipio = round(Tasa_Municipio,2 )) %>% select("Código", "Municipio", "Departamento","Año", "Tasa_Municipio", "Tasa_Variacion")
+  
+  }) 
+
+tabla2 <- reactive({subset(plotall(), Tasa_Municipio>Movil+SDMovil*input$porcentaje2 & tsa.cmbio>(input$porcentaje4/100))  %>% mutate(Tasa_Variacion = round((tsa.cmbio)*100,2),Tasa_Municipio = round(Tasa_Municipio,2 )) %>% select("Código", "Municipio", "Departamento","Año", "Tasa_Municipio", "Tasa_Variacion")})
+
+
+
+```
+
+### Picos en el municipio
+
+```{r}
+DT::renderDT({
+
+ datatable(tabla1(),     extensions = c('Buttons', 'Responsive', 'KeyTable'), width="100%", options = list(
+    dom = 'Bfrtip', scrollY = 200,
+  scroller = TRUE,
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download'
+      )),  searchHighlight = TRUE,
+                   pageLength = 5000,
+                   keys = TRUE,
+                   language = list(
+                     processing = "Procesando...",
+                     lengthMenu =     "Mostrar _MENU_ registros",
+                     zeroRecords =    "No se encontraron resultados",
+                     emptyTable =     "Ningún dato disponible en esta tabla",
+                     info =           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                     infoEmpty =      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                     infoFiltered =   "(filtrado de un total de _MAX_ registros)",
+                     infoPostFix =    "",
+                     search =         "Buscar:",
+                     url =            "",
+                     infoThousands =  ",",
+                     loadingRecords = "Cargando...",
+                     paginate = list(
+                       first =    "Primero",
+                       last =     "Último",
+                       `next` =     "Siguiente",
+                       previous = "Anterior"
+                     ),
+                     aria = list(
+                       sortAscending =   "Activar para ordenar la columna de manera ascendente",
+                       sortDescending =  "Activar para ordenar la columna de manera descendente"
+                     )
+                   )
+    
+  ))
+})
+```
+
+### Picos en el país
+
+```{r}
+DT::renderDT({
+
+ datatable(tabla2(), width="100%", heigh="100%",    extensions = c('Buttons', 'Responsive', 'KeyTable'),
+ options = list(
+    dom = 'Bfrtip', scrollY = 300,
+  scroller = TRUE,
+    buttons = 
+      list('copy', 'print', list(
+        extend = 'collection',
+        buttons = c('csv', 'excel', 'pdf'),
+        text = 'Download'
+      )), searchHighlight = TRUE,
+                   pageLength =10000,
+                   keys = TRUE,
+                   language = list(
+                     processing = "Procesando...",
+                     lengthMenu =     "Mostrar _MENU_ registros",
+                     zeroRecords =    "No se encontraron resultados",
+                     emptyTable =     "Ningún dato disponible en esta tabla",
+                     info =           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                     infoEmpty =      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                     infoFiltered =   "(filtrado de un total de _MAX_ registros)",
+                     infoPostFix =    "",
+                     search =         "Buscar:",
+                     url =            "",
+                     infoThousands =  ",",
+                     loadingRecords = "Cargando...",
+                     paginate = list(
+                       first =    "Primero",
+                       last =     "Último",
+                       `next` =     "Siguiente",
+                       previous = "Anterior"
+                     ),
+                     aria = list(
+                       sortAscending =   "Activar para ordenar la columna de manera ascendente",
+                       sortDescending =  "Activar para ordenar la columna de manera descendente"
+                     )
+                   )
+                   
+    
+  ))
+
+})
+```
+
+
+<!-- Diferencias -->
+<!-- =====================================   -->
+<!-- Column {.sidebar} -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ```{r} -->
+<!-- selectInput('municipio3', 'Seleccione el municipio de su interés', definitiva$`MUNICIPIO - DEPARTAMENTO`) -->
+
+<!-- sliderInput("porcentaje3", "Número de desviaciones estándar con respecto a la diferencia interanual", -->
+<!--                   min = 0, max = 3, -->
+<!--                   value = 0, step = 0.1) -->
+
+<!-- ``` -->
+
+<!-- Column -->
+<!-- ----------------------------------------------------------------------- -->
+
+<!-- ### Diferencias -->
+
+<!-- ```{r} -->
+
+<!-- plotdata6 <- reactive({ -->
+<!-- plot7 <- data.frame(x=datosnal$year, y=datosnal$media.nacional,  -->
+<!--                        mun= as.numeric(t(definitiva[definitiva$`MUNICIPIO - DEPARTAMENTO`== input$municipio3, 9:25])), -->
+<!--                        upper3 = datosnal$media.nacional+4*datosnal$sd.nacional,  -->
+<!--                        upper2 = datosnal$media.nacional+2*datosnal$sd.nacional,  -->
+<!--                        upper = datosnal$media.nacional+datosnal$sd.nacional, -->
+<!--                        lower= datosnal$media.nacional-datosnal$sd.nacional) -->
+<!-- colnames(plot7) <- c("Año", "Tasa", "Tasa_Municipio",  "más_3_desv.","más_2_desv.",   "más_1_desv.","menos_1_desv.") -->
+
+
+<!-- return(plot7) -->
+
+<!-- }) -->
+
+<!-- plotdata5 <- reactive({ -->
+
+<!-- plot5 <- plotdata6() %>% -->
+<!--   mutate(tsa.cmbio= (Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE))/(lag(Tasa_Municipio, na.pad = TRUE)), dfrncia= -->
+<!--            Tasa_Municipio-lag(Tasa_Municipio, na.pad = TRUE) ) -->
+<!--   return(plot5) -->
+<!-- }) -->
+
+<!-- output$scatter3 <- renderPlotly({ -->
+
+
+
+<!-- p <- ggplot(plotdata5()) + geom_line(aes(y=Tasa, x=Año, colour = "blue"))  +  -->
+<!--   geom_line(aes(y=Tasa_Municipio, x=Año, colour = "red")) + -->
+<!--   geom_ribbon(aes(ymin=más_2_desv., ymax=más_3_desv., x=Año, fill = "red"), alpha = 0.3)+ -->
+<!--   geom_ribbon(aes(ymin=más_1_desv., ymax=más_2_desv., x=Año, fill = "orange"), alpha = 0.3)+ -->
+<!--   geom_ribbon(aes(ymin=Tasa, ymax=más_1_desv., x=Año, fill = "yellow") ,alpha = 0.3)+ -->
+<!--  geom_ribbon(aes(ymin=menos_1_desv., ymax=Tasa, x=Año, fill = "lightgreen") ,alpha = 0.3)+ -->
+<!--   scale_fill_identity() + theme(legend.position="none")+ -->
+<!--   geom_point(data=subset(plotdata5(), dfrncia >sd(dfrncia, na.rm=TRUE)*input$porcentaje3), aes(y=Tasa_Municipio,x=Año))+ -->
+<!--   # geom_text(data=subset(plotdata, dfrncia >sd(dfrncia, na.rm=TRUE)*0.5), aes(y=Tasa_Municipio,x=Año,  -->
+<!--   #                                                                            label=paste0(round(tsa.cmbio,2)*100, "%"), -->
+<!--   #                                                                            vjust=-1))+ -->
+<!--    ggtitle(paste0(input$municipio3, " : ", "Picos con más de ", input$porcentaje3, " desv. est. arriba de media de diferencias")) -->
+
+
+<!-- p <- ggplotly(p) -->
+<!-- p -->
+
+
+<!-- }) -->
+
+<!-- plotlyOutput('scatter3', width = "80%") -->
+
+<!-- ``` -->
+
+Clasificaciones de violencia crónica
+=========================================== 
+Column {.sidebar}
+-----------------------------------------------------------------------
+
+```{r}
+sliderInput("range", "Seleccione el rango de desviaciones sobre la media que quiera analizar", min = -1, max = 12,
+      value = range(0, 1), step = 0.1
+    )
+
+sliderInput("range2", "Seleccione el rango de años en el quiere analizar la situación de violencia crónica", min = 2002, max = 2018,
+      value = range(2002, 2018), step = 1)
+    
+sliderInput("range3", "Seleccione el número mínimo de años no consecutivos que se deben mantener en la franja indicada y en el ciclo de años escogido", min = 1, max = 17,
+    value = 10, step = 1
+    )
+
+sliderInput("range4", "Seleccione el número mínimo de años consecutivos que se deben mantener en la franja indicada y en el ciclo de años escogido", min = 1, max = 17,
+    value = 5, step = 1
+    )
+```
+
+#### Tenga en cuenta que:
+
+La violencia o mortalidad crónica puede tener diferentes niveles de intensidad a saber:
+
+- *Violencia crónica baja:* aquella que supera la tendencia nacional pero se mantiene en su totalidad o en forma preponderante dentro de una desviación estándar. (Escoja [0,1], que se lee de 0 a 1)
+- *Violencia crónica media:* aquella que se mantiene en su mayoría en la franja naranja, es decir sin superar 2 desviaciones estándar.(Escoja [1,2] 
+- *Violencia crónica alta:* aquella que se mantiene en su mayoría en la franja roja es decir, más allá de 2 desviaciones estándar. (Escoja [2,3]
+- *Violencia crónica altísima:* se mantiene en su mayoría más allá de 3 desviaciones estándar. (Escoja [3,5]
+
+*Muchas de las violencias pueden compartir las franjas pero prevalecerá la clasificación en la cual la permanencia se dé en su mayoría en una de ellas. Por ejemplo, para analizar violencia crónica puede excoger el intervalo [-0.5, 1.5] para tolerar puntos en la serie que pasen ligeramente la franja indicada *
+
+Column
+-----------------------------------------------------------------------
+
+### Descargue los registros según los parámetros seleccionados
+
+```{r}
+
+nivel_violencia <- reactive({
+violenciaaltisima <- NULL
+  for(i in input$range2[1]:input$range2[2]){
+    picosaño <- filter(definitiva, sapply(select (definitiva, contains (paste0(i,".tasa"))), as.numeric, 2) <= datosnal$media.nacional[datosnal$year ==i] + input$range[2]*datosnal$sd.nacional[datosnal$year ==i]  & sapply(select (definitiva, contains (paste0(i,".tasa"))), as.numeric, 2) >= datosnal$media.nacional[datosnal$year ==i]+ input$range[1]*datosnal$sd.nacional[datosnal$year ==i]) %>% mutate(Año = i) %>%  select("CÓDIGO MUNICIPIO", "MUNICIPIO", "DEPARTAMENTO", "MUNICIPIO - DEPARTAMENTO",Año, "Tasa" = paste0(i,".tasa"), "Conteo" = paste0(i,".conteo"),"Fuente" = paste0(i,".fuente"))
+    violenciaaltisima <- rbind(violenciaaltisima, picosaño) 
+    
+  }
+violenciaaltisima$CODIGO_MUNICIPIO <- violenciaaltisima$`CÓDIGO MUNICIPIO`
+return(violenciaaltisima)
+})
+  
+
+varc <- "MUNICIPIO"
+conteos <- reactive({
+conteopicos <-  nivel_violencia() %>% group_by_(.dots = list("DEPARTAMENTO", "CODIGO_MUNICIPIO", varc)) %>%
+      summarise(Total = n()) %>% rename_(.dots=list("MUNICIPIO"=varc)) %>%
+      select( MUNICIPIO, DEPARTAMENTO, Total)
+
+
+conteopicos$CONSECUTIVO <- NULL
+
+l<-1
+for(i in conteopicos$CODIGO_MUNICIPIO){
+conteopicos$CONSECUTIVO[l] <- as.numeric(max(lengths(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1))))))
+l = l+1
+}
+
+
+conteopicos$INTCONSECUTIVO <-NA
+
+m<-1
+for(i in conteopicos$CODIGO_MUNICIPIO){
+conteopicos$INTCONSECUTIVO[m] <- paste0("[",paste(as.character(min(as.numeric(unlist(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1)))[lengths(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1))))==max(lengths(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1)))))][1])))), collapse = ", "),"-", paste(as.character(max(as.numeric(unlist(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1)))[lengths(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1))))==max(lengths(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1)))))][1])))), collapse = ", "), "]")
+m = m+1
+}
+
+
+
+
+conteopicos$INTERVALO <- NA
+k<-1
+for(i in conteopicos$CODIGO_MUNICIPIO){
+conteopicos$INTERVALO[k] <- paste0("{",paste(as.character(unlist(split( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff( nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1))))), collapse = ", "),"}")
+k = k+1
+}
+
+conteopicos$INTTASAS <-NA
+
+t<-1
+for(i in conteopicos$CODIGO_MUNICIPIO){
+conteopicos$INTTASAS[t] <- paste0("{", round(as.numeric(min(as.numeric(nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Tasa))), 2), "(",nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año[nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Tasa == min(as.numeric(nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Tasa))] ,")-", round(as.numeric(max(as.numeric(nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Tasa))), 2), "(", nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año[nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Tasa == max(as.numeric(nivel_violencia()[ nivel_violencia()$CODIGO_MUNICIPIO==i,]$Tasa))], ")}")
+t = t+1
+}
+
+conteopicos <- conteopicos[conteopicos$CONSECUTIVO>= input$range4,]
+
+conteopicos <- conteopicos[conteopicos$Total>= input$range3,]
+
+  return(conteopicos)
+
+})
+
+
+# listamuni <- reactive({
+#   guhl <- as.character(conteos()$CODIGO_MUNICIPIO)
+#   return(guhl)
+# })
+  
+#   reactive({
+# for(i in listamuni() ){
+# assign(paste0("consecutive",i), reactive({return(split(nivel_violencia()[nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año, cumsum(c(1, diff(nivel_violencia()[nivel_violencia()$CODIGO_MUNICIPIO==i,]$Año) != 1))))}))
+# }
+#   })
+
+texto <-reactive({
+  if(input$range[1]>=-1 & input$range[2]<=0){
+    letra <- paste0("MUNICIPIOS EN VIOLENCIA ENTRE ", input$range[1], " Y ", input$range[2], " DESVIACIONES ARRIBA DE LA MEDIA NACIONAL")
+  }
+   
+  else if (input$range[1]>=-0.5 & input$range[2]<=1.5){
+    letra <- paste0("MUNICIPIOS EN VIOLENCIA CRÓNICA BAJA ENTRE ", input$range[1], " Y ", input$range[2], " DESVIACIONES ARRIBA DE LA MEDIA NACIONAL")
+  }
+  else if(input$range[1]>=0.5 & input$range[2]<=2.5){
+   letra <- paste0("MUNICIPIOS EN  VIOLENCIA CRÓNICA MEDIA ENTRE ", input$range[1], " Y ", input$range[2], " DESVIACIONES ARRIBA DE LA MEDIA NACIONAL")  }
+  else if(input$range[1]>=1.5 & input$range[2]<=3.5){
+   letra <- paste0("MUNICIPIOS EN VIOLENCIA CRÓNICA ALTA ENTRE ", input$range[1], " Y ", input$range[2], " DESVIACIONES ARRIBA DE LA MEDIA NACIONAL")  }
+  else if (input$range[1]>=2.5 & input$range[2]<=14){
+   letra <- paste0("MUNICIPIOS EN VIOLENCIA CRÓNICA ALTÍSIMA ENTRE ", input$range[1], " Y ", input$range[2], " DESVIACIONES ARRIBA DE LA MEDIA NACIONAL")}
+  else{
+   letra <- paste0("MUNICIPIOS EN VIOLENCIA CRÓNICA ENTRE ", input$range[1], " Y ", input$range[2], " DESVIACIONES ARRIBA DE LA MEDIA NACIONAL" ) }
+  return(letra)
+})
+ 
+
+DT::renderDataTable({
+
+ RESUMEN_VARIABLES_TABLA <- tabla_n3(
+  datos = conteos(),
+  categorias = c("Código", "Municipio", "Departamento" , "Tamaño del período consecutivo más amplio",  "Período consecutivo más amplio dentro del período comprometido" ,  "Años compr.","Tasa mín. y máx. dentro de los años comprom.",  "Total años compr."),
+  variable = ' ',
+  mensaje = "Años en la franja",
+  titulo = paste(texto()) 
+)
+  
+})
+
+ 
+# reactive({
+#   for(i in nivel_violencia()$`CÓDIGO MUNICIPIO`){
+# for(k in 1:length(eval(as.name(paste0("consecutive",i))))){
+#   if(length(eval(as.name(paste0("consecutive",i)))) <k) {
+#     break
+#   }
+# if(length(eval(as.name(paste0("consecutive",i)))[[k]])==1){
+#   assign(paste0("consecutive",i),eval(as.name(paste0("consecutive",i)))[-k])
+# }
+# 
+# }
+#   }})
+  
+#     
+#   listaconsecu <- NULL
+#   reactive({
+#   for(i in levels(as.factor(nivel_violencia()$`CÓDIGO MUNICIPIO`))){
+#     if(length(eval(as.name(paste0("consecutive",as.character(i)))))==0){
+#       rm(list=c(paste0("consecutive",i)))
+#     }else{
+#       listaconsecu <-c(listaconsecu, nivel_violencia()$`MUNICIPIO - DEPARTAMENTO`[nivel_violencia()$`CÓDIGO MUNICIPIO`==i])
+#     }
+#   }
+#   })
+#   
+# print(listaconsecu)
+
+# data_for_dl <- reactive({
+# na.omit(selectedPais()[,-16])
+# })
+# 
+# output$downloadCSV <- downloadHandler(
+#   filename = 'data.xlsx', 
+#   content = function(file) {
+#     write.xlsx(data_for_dl(), file)
+#   }
+# )
+
+```
+

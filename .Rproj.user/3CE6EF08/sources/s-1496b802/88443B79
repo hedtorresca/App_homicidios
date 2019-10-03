@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1568301082580.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "88443B79",
+    "lastKnownWriteTime" : 1568305398,
+    "last_content_update" : 1568305398855,
+    "path" : "/cloud/project/dashboard.Rmd",
+    "project_path" : "dashboard.Rmd",
+    "properties" : {
+        "cursorPosition" : "390,103",
+        "scrollLine" : "403"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

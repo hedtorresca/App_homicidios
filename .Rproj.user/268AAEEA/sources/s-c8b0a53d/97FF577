@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1570117448829.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "97FF577",
+    "lastKnownWriteTime" : 94350925353840,
+    "last_content_update" : 1570117448829,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "C858662F",
+        "caption" : "datos3",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=datos3&cache_key=C858662F",
+        "displayedObservations" : 585,
+        "environment" : "",
+        "expression" : "datos3",
+        "object" : "datos3",
+        "preview" : 0,
+        "totalObservations" : 585,
+        "variables" : 19
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
